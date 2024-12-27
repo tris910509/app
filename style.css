@@ -18,8 +18,9 @@ h1 {
     color: #333;
 }
 
-.products, .cart, .add-product {
-    margin-bottom: 20px;
+h2 {
+    color: #333;
+    margin-top: 20px;
 }
 
 button {
@@ -29,6 +30,8 @@ button {
     padding: 10px;
     cursor: pointer;
     font-size: 16px;
+    width: 100%;
+    margin-top: 10px;
 }
 
 button:hover {
@@ -38,8 +41,14 @@ button:hover {
 input[type="text"], input[type="number"] {
     padding: 10px;
     margin: 10px;
-    width: 200px;
+    width: calc(100% - 22px);
     font-size: 16px;
+    border: 1px solid #ccc;
+}
+
+form {
+    display: flex;
+    flex-direction: column;
 }
 
 ul {
@@ -51,4 +60,23 @@ li {
     margin: 10px 0;
     padding: 10px;
     background-color: #f0f0f0;
+    display: flex;
+    justify-content: space-between;
+}
+
+#checkout {
+    background-color: #2196F3;
+    margin-top: 20px;
+}
+
+#checkout:hover {
+    background-color: #0b7dda;
+}
+
+.products, .cart, .add-product, .history {
+    margin-bottom: 20px;
+}
+
+.container > h2 {
+    margin-top: 20px;
 }
