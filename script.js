@@ -3,6 +3,11 @@ let editingIndex = null;
 let currentPage = 1;
 const itemsPerPage = 5;
 
+// Cek apakah ada data produk yang tersimpan di localStorage
+if (localStorage.getItem("products")) {
+    products = JSON.parse(localStorage.getItem("products"));
+}
+
 document.getElementById("productForm").addEventListener("submit", function (e) {
     e.preventDefault();
 
@@ -26,6 +31,7 @@ document.getElementById("productForm").addEventListener("submit", function (e) {
     }
 
     document.getElementById("productForm").reset();
+    saveProductsToLocalStorage();
     renderProducts();
 });
 
@@ -95,7 +101,13 @@ function editProduct(index) {
 
 function deleteProduct(index) {
     products.splice(index, 1);
+    saveProductsToLocalStorage();
     renderProducts();
+}
+
+// Simpan produk ke localStorage
+function saveProductsToLocalStorage() {
+    localStorage.setItem("products", JSON.stringify(products));
 }
 
 // Render produk awal
