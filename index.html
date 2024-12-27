@@ -4,79 +4,96 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Aplikasi POS Kasir</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
 </head>
 <body>
-    <div class="container">
-        <h1>Point of Sale - Aplikasi Kasir</h1>
+    <div class="container mt-5">
+        <h1 class="text-center mb-4">Point of Sale - Aplikasi Kasir</h1>
 
-        <!-- Pencarian Produk -->
-        <div class="search">
-            <input type="text" id="search-product" placeholder="Cari Produk..." onkeyup="searchProduct()">
+        <!-- Login -->
+        <div id="login" class="login">
+            <div class="mb-3">
+                <input type="text" id="username" class="form-control" placeholder="Username" required>
+            </div>
+            <div class="mb-3">
+                <input type="password" id="pin" class="form-control" placeholder="Masukkan PIN" required>
+            </div>
+            <button onclick="login()" class="btn btn-primary w-100">Login</button>
         </div>
 
-        <!-- Daftar Produk -->
-        <div class="products">
-            <h2>Daftar Produk</h2>
-            <ul id="product-list"></ul>
-        </div>
+        <!-- Aplikasi POS -->
+        <div id="app" class="d-none">
+            <!-- Cari Produk -->
+            <div class="mb-3">
+                <input type="text" id="search-product" class="form-control" placeholder="Cari Produk..." onkeyup="searchProduct()">
+            </div>
 
-        <!-- Keranjang Belanja -->
-        <div class="cart">
-            <h2>Keranjang Belanja</h2>
-            <ul id="cart-list"></ul>
-            <p>Total: Rp<span id="total-price">0</span></p>
-            <label for="discount">Diskon (%): </label>
-            <input type="number" id="discount" min="0" max="100" value="0">
-            <p>Total Setelah Diskon: Rp<span id="discounted-price">0</span></p>
-            <label for="payment-method">Metode Pembayaran: </label>
-            <select id="payment-method">
-                <option value="cash">Tunai</option>
-                <option value="card">Kartu Kredit</option>
-            </select>
-            <button id="checkout">Bayar</button>
-        </div>
+            <!-- Daftar Produk -->
+            <div class="mb-4">
+                <h3>Daftar Produk</h3>
+                <ul id="product-list" class="list-group"></ul>
+            </div>
 
-        <!-- Tambah Produk -->
-        <div class="add-product">
-            <h2>Tambah Produk</h2>
-            <form id="add-product-form">
-                <input type="text" id="product-name" placeholder="Nama Produk" required>
-                <input type="number" id="product-price" placeholder="Harga" required>
-                <input type="number" id="product-stock" placeholder="Stok Produk" required>
-                <button type="submit">Tambah Produk</button>
-            </form>
-        </div>
+            <!-- Keranjang Belanja -->
+            <div class="mb-4">
+                <h3>Keranjang Belanja</h3>
+                <ul id="cart-list" class="list-group"></ul>
+                <p>Total: <strong>Rp<span id="total-price">0</span></strong></p>
+                <label for="discount">Diskon (%)</label>
+                <input type="number" id="discount" class="form-control mb-3" min="0" max="100" value="0">
+                <p>Total Setelah Diskon: <strong>Rp<span id="discounted-price">0</span></strong></p>
+                <label for="payment-amount">Jumlah Bayar: </label>
+                <input type="number" id="payment-amount" class="form-control mb-3" min="0" value="0">
+                <button id="checkout" class="btn btn-success w-100">Bayar</button>
+                <p id="change-amount" style="display:none;">Kembalian: Rp<span id="change-value">0</span></p>
+            </div>
 
-        <!-- Riwayat Transaksi -->
-        <div class="history">
-            <h2>Riwayat Transaksi</h2>
-            <ul id="transaction-history"></ul>
-        </div>
+            <!-- Tambah Produk -->
+            <div class="mb-4">
+                <h3>Tambah Produk</h3>
+                <form id="add-product-form">
+                    <div class="mb-3">
+                        <input type="text" id="product-name" class="form-control" placeholder="Nama Produk" required>
+                    </div>
+                    <div class="mb-3">
+                        <input type="number" id="product-price" class="form-control" placeholder="Harga" required>
+                    </div>
+                    <div class="mb-3">
+                        <input type="number" id="product-stock" class="form-control" placeholder="Stok Produk" required>
+                    </div>
+                    <div class="mb-3">
+                        <select id="product-category" class="form-select">
+                            <option value="electronics">Elektronik</option>
+                            <option value="groceries">Makanan</option>
+                            <option value="clothing">Pakaian</option>
+                        </select>
+                    </div>
+                    <button type="submit" class="btn btn-primary w-100">Tambah Produk</button>
+                </form>
+            </div>
 
-        <!-- Login Admin -->
-        <div class="admin-login">
-            <h2>Login Admin</h2>
-            <form id="admin-login-form">
-                <input type="password" id="admin-password" placeholder="Password Admin" required>
-                <button type="submit">Login</button>
-            </form>
-        </div>
+            <!-- Riwayat Transaksi -->
+            <div class="mb-4">
+                <h3>Riwayat Transaksi</h3>
+                <ul id="transaction-history" class="list-group"></ul>
+                <button onclick="exportCSV()" class="btn btn-info w-100 mt-3">Export CSV</button>
+            </div>
 
-        <!-- Laporan Penjualan -->
-        <div class="report">
-            <h2>Laporan Penjualan</h2>
-            <form id="report-form">
-                <label for="start-date">Tanggal Mulai: </label>
-                <input type="date" id="start-date">
-                <label for="end-date">Tanggal Selesai: </label>
-                <input type="date" id="end-date">
-                <button type="submit">Tampilkan Laporan</button>
-            </form>
-            <ul id="sales-report"></ul>
+            <!-- Daftar Pelanggan -->
+            <div class="mb-4">
+                <h3>Daftar Pelanggan</h3>
+                <ul id="customer-list" class="list-group"></ul>
+            </div>
+
+            <!-- Logout Button -->
+            <button id="logout" onclick="logout()" class="btn btn-danger w-100 mt-4">Logout</button>
         </div>
     </div>
 
+    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.11.6/dist/umd/popper.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.min.js"></script>
     <script src="app.js"></script>
 </body>
 </html>
