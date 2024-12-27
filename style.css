@@ -1,14 +1,16 @@
-/* Styling tambahan untuk UI */
 body {
-    background-color: #f4f7f6;
+    background-color: #f8f9fa;
     font-family: Arial, sans-serif;
 }
 
-.container {
-    max-width: 900px;
+.nav-tabs .nav-link {
+    cursor: pointer;
 }
 
-#change-amount {
-    margin-top: 20px;
-    font-weight: bold;
+.tab-content {
+    display: none;
+}
+
+.tab-content.active {
+    display: block;
 }
