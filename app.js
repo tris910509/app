@@ -1,13 +1,11 @@
-
-
-
+// Data Struktur
 let products = [];
 let customers = [];
 let transactions = [];
-let currentUser = null;
 let cart = [];
+let currentUser = null;
 
-
+// Login
 function login() {
     const username = document.getElementById("username").value.trim();
     const password = document.getElementById("password").value.trim();
@@ -26,14 +24,16 @@ function logout() {
     document.getElementById("app-section").classList.add("d-none");
 }
 
+// Tab Navigation
 function showTab(tab) {
     const tabs = document.querySelectorAll(".tab-content");
-    tabs.forEach((tabElement) => tabElement.classList.add("d-none"));
+    tabs.forEach(tabContent => tabContent.classList.add("d-none"));
     document.getElementById(tab).classList.remove("d-none");
 }
 
-
-function addProduct() {
+// Produk CRUD
+function addProduct(event) {
+    event.preventDefault();
     const name = document.getElementById("product-name").value.trim();
     const price = parseFloat(document.getElementById("product-price").value);
     const stock = parseInt(document.getElementById("product-stock").value);
@@ -41,7 +41,7 @@ function addProduct() {
     const image = document.getElementById("product-image").files[0];
 
     if (!name || isNaN(price) || isNaN(stock) || !category) {
-        alert("Harap isi semua field produk dengan benar!");
+        alert("Isi semua field produk dengan benar!");
         return;
     }
 
@@ -50,11 +50,13 @@ function addProduct() {
         const imageUrl = reader.result;
         products.push({ name, price, stock, category, imageUrl });
         renderProducts();
+        document.getElementById("product-form").reset();
     };
     if (image) reader.readAsDataURL(image);
     else {
         products.push({ name, price, stock, category, imageUrl: null });
         renderProducts();
+        document.getElementById("product-form").reset();
     }
 }
 
@@ -88,20 +90,22 @@ function deleteProduct(index) {
     }
 }
 
-
-function addCustomer() {
+// Pelanggan CRUD
+function addCustomer(event) {
+    event.preventDefault();
     const name = document.getElementById("customer-name").value.trim();
     const phone = document.getElementById("customer-phone").value.trim();
     const email = document.getElementById("customer-email").value.trim();
 
     if (!name || !phone || !email) {
-        alert("Harap isi semua field pelanggan dengan benar!");
+        alert("Isi semua field pelanggan dengan benar!");
         return;
     }
 
     const id = `CUST-${customers.length + 1}`;
     customers.push({ id, name, phone, email, points: 0 });
     renderCustomers();
+    document.getElementById("customer-form").reset();
 }
 
 function renderCustomers() {
@@ -132,8 +136,7 @@ function deleteCustomer(id) {
     }
 }
 
-
-
+// Transaksi
 function addToCart(productIndex) {
     const product = products[productIndex];
     const existing = cart.find(item => item.name === product.name);
@@ -177,6 +180,11 @@ function renderCart() {
     totalDisplay.textContent = total.toFixed(2);
 }
 
+function removeCartItem(index) {
+    cart.splice(index, 1);
+    renderCart();
+}
+
 function checkout() {
     const method = document.getElementById("payment-method").value;
     if (!cart.length) {
@@ -214,18 +222,3 @@ function renderTransactions() {
         `;
     });
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
