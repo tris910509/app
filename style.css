@@ -1,35 +1,14 @@
-/* Tampilan untuk pencarian produk */
-.search input {
-    padding: 10px;
-    width: 100%;
-    font-size: 16px;
-    border: 1px solid #ccc;
-    margin-bottom: 20px;
+/* Styling tambahan untuk UI */
+body {
+    background-color: #f4f7f6;
+    font-family: Arial, sans-serif;
 }
 
-/* Tampilan untuk laporan penjualan */
-.report {
+.container {
+    max-width: 900px;
+}
+
+#change-amount {
     margin-top: 20px;
-}
-
-.report input {
-    margin: 10px;
-    padding: 10px;
-}
-
-#payment-method {
-    padding: 10px;
-    margin-top: 10px;
-}
-
-#checkout {
-    background-color: #2196F3;
-    color: white;
-    padding: 10px;
-    width: 100%;
-    font-size: 16px;
-}
-
-#checkout:hover {
-    background-color: #0b7dda;
+    font-weight: bold;
 }
