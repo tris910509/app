@@ -38,7 +38,7 @@ button:hover {
     background-color: #45a049;
 }
 
-input[type="text"], input[type="number"] {
+input[type="text"], input[type="number"], input[type="password"] {
     padding: 10px;
     margin: 10px;
     width: calc(100% - 22px);
@@ -73,10 +73,15 @@ li {
     background-color: #0b7dda;
 }
 
-.products, .cart, .add-product, .history {
+.products, .cart, .add-product, .history, .admin-login {
     margin-bottom: 20px;
 }
 
 .container > h2 {
     margin-top: 20px;
+}
+
+/* Style untuk login admin */
+.admin-login {
+    display: none; /* Secara default disembunyikan */
 }
