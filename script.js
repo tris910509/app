@@ -1,61 +1,73 @@
 let products = [];
-let editingIndex = null;
+let cart = [];
 let currentPage = 1;
 const itemsPerPage = 5;
-let cart = [];
+let loggedInUser = null;
+let users = [];
 
-// Cek apakah ada data produk yang tersimpan di localStorage
+// Cek apakah ada data produk, riwayat pembelian, dan data pengguna yang tersimpan di localStorage
 if (localStorage.getItem("products")) {
     products = JSON.parse(localStorage.getItem("products"));
 }
-
-// Cek apakah ada data keranjang yang tersimpan di localStorage
 if (localStorage.getItem("cart")) {
     cart = JSON.parse(localStorage.getItem("cart"));
 }
+if (localStorage.getItem("loggedInUser")) {
+    loggedInUser = JSON.parse(localStorage.getItem("loggedInUser"));
+    displayLoggedIn();
+}
+if (localStorage.getItem("users")) {
+    users = JSON.parse(localStorage.getItem("users"));
+}
 
-document.getElementById("productForm").addEventListener("submit", function (e) {
+document.getElementById("loginForm").addEventListener("submit", function (e) {
     e.preventDefault();
 
-    const name = document.getElementById("productName").value;
-    const price = document.getElementById("productPrice").value;
-    const category = document.getElementById("productCategory").value;
-    const description = document.getElementById("productDescription").value;
-    const imageFile = document.getElementById("productImage").files[0];
+    const username = document.getElementById("username").value;
+    const password = document.getElementById("password").value;
 
-    // Validasi form
-    if (!name || !price || !category || !description) {
-        alert("Semua field harus diisi!");
-        return;
-    }
+    // Autentikasi pengguna sederhana
+    const user = users.find(user => user.username === username && user.password === password);
 
-    const imageUrl = imageFile ? URL.createObjectURL(imageFile) : "";
-
-    if (editingIndex === null) {
-        // Tambah produk baru
-        products.push({ name, price, category, description, imageUrl });
+    if (user) {
+        loggedInUser = user;
+        localStorage.setItem("loggedInUser", JSON.stringify(loggedInUser));
+        displayLoggedIn();
     } else {
-        // Edit produk
-        products[editingIndex] = { name, price, category, description, imageUrl };
-        editingIndex = null;
+        alert("Username atau password salah!");
     }
+});
 
-    document.getElementById("productForm").reset();
-    saveProductsToLocalStorage();
+function displayLoggedIn() {
+    document.getElementById("loginSection").style.display = "none";
+    document.getElementById("logoutSection").style.display = "block";
     renderProducts();
-});
+    renderCart();
+    renderPurchaseHistory();
+}
 
-document.getElementById("searchInput").addEventListener("input", function (e) {
-    const searchText = e.target.value.toLowerCase();
-    renderProducts(searchText);
-});
+function logout() {
+    localStorage.removeItem("loggedInUser");
+    loggedInUser = null;
+    document.getElementById("loginSection").style.display = "block";
+    document.getElementById("logoutSection").style.display = "none";
+    renderProducts();
+    renderCart();
+}
 
-function renderProducts(searchText = "") {
-    const filteredProducts = products.filter(product =>
-        product.name.toLowerCase().includes(searchText) ||
-        product.description.toLowerCase().includes(searchText) ||
-        product.category.toLowerCase().includes(searchText)
-    );
+function renderProducts() {
+    const searchText = document.getElementById("searchInput").value.toLowerCase();
+    const category = document.getElementById("categoryFilter").value;
+    const maxPrice = document.getElementById("priceFilter").value;
+
+    const filteredProducts = products.filter(product => {
+        return (
+            (product.name.toLowerCase().includes(searchText) ||
+                product.description.toLowerCase().includes(searchText)) &&
+            (category === "" || product.category === category) &&
+            product.price <= maxPrice
+        );
+    });
 
     const start = (currentPage - 1) * itemsPerPage;
     const end = start + itemsPerPage;
@@ -73,10 +85,11 @@ function renderProducts(searchText = "") {
             <td>${product.category}</td>
             <td>${product.description}</td>
             <td><img src="${product.imageUrl}" alt="Gambar Produk" width="100"></td>
+            <td>${product.stock}</td>
             <td>
                 <button class="btn btn-warning btn-sm" onclick="editProduct(${start + index})">Edit</button>
                 <button class="btn btn-danger btn-sm" onclick="deleteProduct(${start + index})">Hapus</button>
-                <button class="btn btn-info btn-sm" onclick="addToCart(${start + index})">Tambah ke Keranjang</button>
+                <button class="btn btn-info btn-sm" onclick="addToCart(${start + index})" ${product.stock === 0 ? 'disabled' : ''}>Tambah ke Keranjang</button>
             </td>
         `;
         productTable.appendChild(row);
@@ -111,6 +124,7 @@ function editProduct(index) {
     document.getElementById("productPrice").value = product.price;
     document.getElementById("productCategory").value = product.category;
     document.getElementById("productDescription").value = product.description;
+    document.getElementById("productStock").value = product.stock;
     editingIndex = index;
 }
 
@@ -120,15 +134,21 @@ function deleteProduct(index) {
     renderProducts();
 }
 
-function saveProductsToLocalStorage() {
-    localStorage.setItem("products", JSON.stringify(products));
+function addToCart(index) {
+    const product = products[index];
+    if (product.stock > 0) {
+        cart.push(product);
+        product.stock--;
+        saveProductsToLocalStorage();
+        saveCartToLocalStorage();
+        renderCart();
+    } else {
+        alert("Stok produk habis!");
+    }
 }
 
-function addToCart(index) {
-    cart.push(products[index]);
-    saveCartToLocalStorage();
-    alert("Produk ditambahkan ke keranjang!");
-    renderCart();
+function saveProductsToLocalStorage() {
+    localStorage.setItem("products", JSON.stringify(products));
 }
 
 function saveCartToLocalStorage() {
@@ -154,7 +174,10 @@ function renderCart() {
 }
 
 function removeFromCart(index) {
+    const item = cart[index];
+    item.stock++;
     cart.splice(index, 1);
+    saveProductsToLocalStorage();
     saveCartToLocalStorage();
     renderCart();
 }
@@ -166,12 +189,60 @@ function checkout() {
     }
 
     let totalPrice = cart.reduce((total, item) => total + parseInt(item.price), 0);
-    alert(`Total harga: Rp ${totalPrice}. Proses pembayaran simulasi selesai.`);
+    if (loggedInUser.balance < totalPrice) {
+        alert("Saldo tidak cukup untuk checkout.");
+        return;
+    }
+
+    // Proses checkout dan simpan histori pembelian
+    loggedInUser.balance -= totalPrice;
+    users = users.map(user => user.username === loggedInUser.username ? loggedInUser : user);
+    localStorage.setItem("users", JSON.stringify(users));
+
+    // Menyimpan histori pembelian
+    const purchaseHistory = loggedInUser.purchaseHistory || [];
+    purchaseHistory.push({
+        date: new Date().toLocaleString(),
+        items: cart,
+        total: totalPrice
+    });
+    loggedInUser.purchaseHistory = purchaseHistory;
+    localStorage.setItem("loggedInUser", JSON.stringify(loggedInUser));
+
     cart = [];
     saveCartToLocalStorage();
     renderCart();
+    renderPurchaseHistory();
 }
 
-// Render produk awal dan keranjang
+function renderPurchaseHistory() {
+    const purchaseHistory = loggedInUser?.purchaseHistory || [];
+    const purchaseHistorySection = document.getElementById("purchaseHistory");
+    purchaseHistorySection.innerHTML = "";
+    if (purchaseHistory.length === 0) {
+        purchaseHistorySection.innerHTML = "<p>Belum ada riwayat pembelian.</p>";
+    } else {
+        purchaseHistory.forEach(history => {
+            const row = document.createElement("div");
+            row.classList.add("mb-3");
+            row.innerHTML = `
+                <strong>${history.date}</strong>
+                <ul>
+                    ${history.items.map(item => `<li>${item.name} - Rp ${item.price}</li>`).join('')}
+                </ul>
+                <p>Total: Rp ${history.total}</p>
+            `;
+            purchaseHistorySection.appendChild(row);
+        });
+    }
+}
+
+// Simulasi saldo untuk user
+if (loggedInUser) {
+    loggedInUser.balance = loggedInUser.balance || 1000000; // Misalnya saldo awal 1 juta
+    localStorage.setItem("loggedInUser", JSON.stringify(loggedInUser));
+}
+
 renderProducts();
 renderCart();
+renderPurchaseHistory();
